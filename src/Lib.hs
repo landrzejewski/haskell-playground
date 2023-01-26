@@ -2,10 +2,11 @@
 
 module Lib
   ( anagrams,
+    users,
   )
 where
 
-import Data.Char (isAlpha)
+import Data.Char (isAlpha, isAlphaNum, isSpace)
 import Data.List (sort)
 
 -- if-else (only boolean) vs. case
@@ -43,3 +44,44 @@ anagrams = do
   putStr "Please enter a second word:\n> "
   second <- getLine
   print (checkAnagram first second)
+
+-- Users
+
+trimLeading :: String -> Maybe String
+trimLeading "" = Nothing
+trimLeading (x : xs) =
+  if isSpace x
+    then trimLeading xs
+    else Just (x : xs)
+
+requireLength :: Int -> Int -> String -> Maybe String
+requireLength min max xs =
+  if len >= min && len <= max
+    then Just xs
+    else Nothing
+  where
+    len = length xs
+
+requireAlphaNum :: String -> Maybe String
+requireAlphaNum xs =
+  if all isAlphaNum xs
+    then Just xs
+    else Nothing
+
+checkPassword :: String -> Maybe String
+{-
+checkPassword text = case trimLeading text of
+  Nothing -> Nothing
+  Just password -> case requireLength 2 8 password of
+    Nothing -> Nothing
+    Just _ -> case requireAlphaNum password of
+      Nothing -> Nothing
+      Just _ -> Just password
+-}
+checkPassword password = trimLeading password >>= requireLength 2 8 >>= requireAlphaNum
+
+users :: IO ()
+users = do
+  putStr "Please enter a password\n> "
+  password <- getLine
+  print (checkPassword password)
